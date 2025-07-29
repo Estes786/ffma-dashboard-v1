@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "vercel dev",
-    "build": "vercel build",
+    "build": "cd fmaa-dashboard && npm install --legacy-peer-deps && npm run build",
     "deploy": "vercel --prod",
-    "test": "jest"
+    "test": "jest",
+    "install-all": "npm install && cd fmaa-dashboard && npm install --legacy-peer-deps"
   },
   "keywords": [
     "micro-agents",
