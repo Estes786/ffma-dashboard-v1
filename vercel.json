@@ -2,6 +2,11 @@
   "version": 2,
   "builds": [
     {
+      "src": "fmaa-dashboard/index.html",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "fmaa-dashboard/dist" }
+    },
+    {
       "src": "api/**/*.js",
       "use": "@vercel/node"
     }
@@ -10,12 +15,16 @@
     {
       "src": "/api/(.*)",
       "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "fmaa-dashboard/$1"
     }
   ],
   "env": {
     "SUPABASE_URL": "@supabase-url",
     "SUPABASE_ANON_KEY": "@supabase-anon-key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
     "HUGGINGFACE_API_KEY": "@huggingface-api-key",
     "NODE_ENV": "production"
   },
@@ -25,4 +34,3 @@
     }
   }
 }
-
