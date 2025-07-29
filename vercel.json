@@ -11,5 +11,12 @@
       "src": "/api/(.*)",
       "dest": "/api/$1"
     }
-  ]
+  ],
+  "env": {
+    "SUPABASE_URL": "@supabase-url",
+    "SUPABASE_ANON_KEY": "@supabase-anon-key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-key", 
+    "HUGGINGFACE_API_KEY": "@huggingface-api-key",
+    "NODE_ENV": "production"
+  }
 }
