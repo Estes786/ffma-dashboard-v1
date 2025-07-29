@@ -24,6 +24,6 @@
     }
   ],
   "buildCommand": "cd fmaa-dashboard && npm install --legacy-peer-deps && npm run build",
-  "installCommand": "npm install && cd fmaa-dashboard && npm install --legacy-peer-deps",
+  "installCommand": "npm install --legacy-peer-deps && cd fmaa-dashboard && npm install --legacy-peer-deps",
   "outputDirectory": "fmaa-dashboard/dist"
 }
