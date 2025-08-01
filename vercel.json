@@ -19,15 +19,18 @@
       "dest": "/api/$1"
     },
     {
-      "src": "/fmaa-dashboard/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json))",
-      "dest": "/fmaa-dashboard/$1"
+      "src": "/assets/(.*)",
+      "dest": "/fmaa-dashboard/dist/assets/$1"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json))",
+      "dest": "/fmaa-dashboard/dist/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/fmaa-dashboard/index.html"
+      "dest": "/fmaa-dashboard/dist/index.html"
     }
   ],
   "buildCommand": "cd fmaa-dashboard && npm install --legacy-peer-deps && npm run build",
-  "installCommand": "npm install --legacy-peer-deps && cd fmaa-dashboard && npm install --legacy-peer-deps",
-  "outputDirectory": "fmaa-dashboard/dist"
+  "installCommand": "npm install --legacy-peer-deps && cd fmaa-dashboard && npm install --legacy-peer-deps"
 }
