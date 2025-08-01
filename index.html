@@ -1,91 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMAA Dashboard - Basic Test</title>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            background: #f5f5f5;
-        }
-        .container { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .status { color: green; font-weight: bold; }
-        .error { color: red; }
-        .loading { color: blue; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🚀 FMAA Dashboard</h1>
-        <div class="status">✅ Basic HTML serving is working!</div>
-        <p><strong>Current time:</strong> <span id="time"></span></p>
-        
-        <hr>
-        <h3>🔗 API Tests</h3>
-        <div id="api-tests">
-            <p class="loading">Testing API endpoints...</p>
-        </div>
-        
-        <hr>
-        <h3>📋 Debug Info</h3>
-        <ul>
-            <li><strong>User Agent:</strong> <span id="user-agent"></span></li>
-            <li><strong>URL:</strong> <span id="current-url"></span></li>
-            <li><strong>Referrer:</strong> <span id="referrer"></span></li>
-        </ul>
-        
-        <hr>
-        <h3>🎯 Next Steps</h3>
-        <p>If you can see this page, then basic static serving is working. The issue was likely with the React app configuration or build process.</p>
-        
-        <button onclick="location.reload()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
-            🔄 Refresh Page
-        </button>
-    </div>
-
-    <script>
-        // Update time
-        document.getElementById('time').textContent = new Date().toISOString();
-        document.getElementById('user-agent').textContent = navigator.userAgent;
-        document.getElementById('current-url').textContent = window.location.href;
-        document.getElementById('referrer').textContent = document.referrer || 'Direct access';
-        
-        // Test API endpoints
-        const apiTests = document.getElementById('api-tests');
-        
-        async function testAPI() {
-            const tests = [
-                { name: 'Health Check', url: '/api/health' },
-                { name: 'Debug Info', url: '/api/debug' },
-                { name: 'Metrics', url: '/api/metrics' }
-            ];
-            
-            let results = '<ul>';
-            
-            for (const test of tests) {
-                try {
-                    const response = await fetch(test.url);
-                    const status = response.ok ? '✅' : '❌';
-                    results += `<li>${status} <strong>${test.name}:</strong> ${response.status} ${response.statusText}</li>`;
-                } catch (error) {
-                    results += `<li>❌ <strong>${test.name}:</strong> Error - ${error.message}</li>`;
-                }
-            }
-            
-            results += '</ul>';
-            apiTests.innerHTML = results;
-        }
-        
-        testAPI();
-    </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FMAA Dashboard - Federated Micro-Agents Architecture</title>
+    <script type="module" crossorigin src="/assets/index-4HAaOQ1N.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CoxYw33S.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
 </html>
