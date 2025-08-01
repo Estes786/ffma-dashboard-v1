@@ -1,86 +1,92 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { Sidebar } from '@/components/Sidebar'
-import { Header } from '@/components/Header'
-import { Dashboard } from '@/components/Dashboard'
-import { AgentsPage } from '@/components/AgentsPage'
-import { TasksPage } from '@/components/TasksPage'
-import { MetricsPage } from '@/components/MetricsPage'
-import { LogsPage } from '@/components/LogsPage'
-import { SettingsPage } from '@/components/SettingsPage'
-import { Toaster } from '@/components/ui/toaster'
-import { ThemeProvider } from '@/components/ThemeProvider'
 import './App.css'
 
-function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [systemStatus, setSystemStatus] = useState({
-    status: 'loading',
-    agents: { total: 0, active: 0 },
-    tasks: { total: 0, running: 0 },
-    errors: { total: 0 }
-  })
+// Simple test component first
+function TestApp() {
+  return (
+    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
+      <h1>🎉 FMAA Dashboard Test</h1>
+      <p>If you can see this, React is working!</p>
+      <p>Current time: {new Date().toISOString()}</p>
+      <div style={{ marginTop: '20px' }}>
+        <button onClick={() => alert('Button works!')}>Test Button</button>
+      </div>
+    </div>
+  )
+}
 
-  // Fetch system status on mount
+// Main App with error boundary
+function App() {
+  const [hasError, setHasError] = useState(false)
+  const [isTestMode, setIsTestMode] = useState(true) // Start in test mode
+  
   useEffect(() => {
-    fetchSystemStatus()
-    // Set up polling for real-time updates
-    const interval = setInterval(fetchSystemStatus, 30000) // Every 30 seconds
-    return () => clearInterval(interval)
+    console.log('App component mounted successfully!')
+    console.log('Environment check:', {
+      isDev: import.meta.env.DEV,
+      mode: import.meta.env.MODE,
+      baseUrl: import.meta.env.BASE_URL
+    })
   }, [])
 
-  const fetchSystemStatus = async () => {
-    try {
-      // In a real app, this would call the API
-      // For demo, we'll simulate the data
-      setSystemStatus({
-        status: 'healthy',
-        agents: { total: 3, active: 3 },
-        tasks: { total: 156, running: 4 },
-        errors: { total: 2 }
-      })
-    } catch (error) {
-      console.error('Failed to fetch system status:', error)
-      setSystemStatus(prev => ({ ...prev, status: 'error' }))
-    }
+  // Error boundary
+  if (hasError) {
+    return (
+      <div style={{ padding: '20px', color: 'red' }}>
+        <h1>⚠️ Something went wrong</h1>
+        <p>There was an error loading the dashboard.</p>
+        <button onClick={() => setHasError(false)}>Try Again</button>
+      </div>
+    )
   }
 
-  return (
-    <ThemeProvider defaultTheme="light" storageKey="fmaa-ui-theme">
-      <Router>
-        <div className="min-h-screen bg-background">
-          <Sidebar 
-            open={sidebarOpen} 
-            onOpenChange={setSidebarOpen}
-            systemStatus={systemStatus}
-          />
-          
-          <div className="lg:pl-72">
-            <Header 
-              onMenuClick={() => setSidebarOpen(true)}
-              systemStatus={systemStatus}
-            />
-            
-            <main className="py-6">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <Routes>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<Dashboard systemStatus={systemStatus} />} />
-                  <Route path="/agents" element={<AgentsPage />} />
-                  <Route path="/tasks" element={<TasksPage />} />
-                  <Route path="/metrics" element={<MetricsPage />} />
-                  <Route path="/logs" element={<LogsPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                </Routes>
-              </div>
-            </main>
+  // Test mode first
+  if (isTestMode) {
+    return (
+      <div>
+        <TestApp />
+        <button 
+          onClick={() => setIsTestMode(false)}
+          style={{ margin: '20px', padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px' }}
+        >
+          Load Full Dashboard
+        </button>
+      </div>
+    )
+  }
+
+  try {
+    // Import components dynamically to catch import errors
+    const { Sidebar } = require('@/components/Sidebar')
+    const { Header } = require('@/components/Header')
+    const { Dashboard } = require('@/components/Dashboard')
+    const { ThemeProvider } = require('@/components/ThemeProvider')
+
+    return (
+      <ThemeProvider defaultTheme="light" storageKey="fmaa-ui-theme">
+        <Router>
+          <div className="min-h-screen bg-background">
+            <div className="lg:pl-72">
+              <main className="py-6">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/*" element={<div>Page not found</div>} />
+                  </Routes>
+                </div>
+              </main>
+            </div>
           </div>
-          
-          <Toaster />
-        </div>
-      </Router>
-    </ThemeProvider>
-  )
+        </Router>
+      </ThemeProvider>
+    )
+  } catch (error) {
+    console.error('Error loading components:', error)
+    setHasError(true)
+    return <div>Loading error: {error.message}</div>
+  }
 }
 
 export default App
