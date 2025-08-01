@@ -1,5 +1,4 @@
 {
-  "version": 2,
   "buildCommand": "cd fmaa-dashboard && npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "fmaa-dashboard/dist",
   "installCommand": "npm install",
@@ -17,25 +16,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "origin-when-cross-origin"
-        }
-      ]
-    }
-  ],
-  "public": true
+  ]
 }
