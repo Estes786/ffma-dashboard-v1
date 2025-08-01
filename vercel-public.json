@@ -16,17 +16,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "public": true,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex"
-        }
-      ]
-    }
   ]
 }
