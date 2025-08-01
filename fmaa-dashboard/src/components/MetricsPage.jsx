@@ -373,17 +373,72 @@ function AgentMetricsTable({ data }) {
 export function MetricsPage() {
   const [timeframe, setTimeframe] = useState('24h')
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [metricsData, setMetricsData] = useState({
+    overview: null,
+    performance: performanceData,
+    agents: agentMetrics,
+    errors: errorAnalysis
+  })
+  const [loading, setLoading] = useState(true)
+
+  // Fetch metrics data from API
+  const fetchMetricsData = async () => {
+    try {
+      setLoading(true)
+      
+      // Fetch overview metrics
+      const overviewResponse = await fetch(`/api/metrics?type=overview&timeframe=${timeframe}`)
+      const overviewData = await overviewResponse.json()
+      
+      // Fetch performance metrics
+      const performanceResponse = await fetch(`/api/metrics?type=performance&timeframe=${timeframe}`)
+      const performanceData = await performanceResponse.json()
+      
+      // Fetch agent metrics
+      const agentResponse = await fetch(`/api/metrics?type=agents&timeframe=${timeframe}`)
+      const agentData = await agentResponse.json()
+      
+      // Fetch error metrics
+      const errorResponse = await fetch(`/api/metrics?type=errors&timeframe=${timeframe}`)
+      const errorData = await errorResponse.json()
+      
+      setMetricsData({
+        overview: overviewData.success ? overviewData.data : null,
+        performance: performanceData.success ? performanceData.data : performanceData,
+        agents: agentData.success ? agentData.data : agentMetrics,
+        errors: errorData.success ? errorData.data : errorAnalysis
+      })
+    } catch (error) {
+      console.error('Failed to fetch metrics:', error)
+      // Keep using mock data on error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load data on mount and timeframe change
+  useEffect(() => {
+    fetchMetricsData()
+  }, [timeframe])
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await fetchMetricsData()
     setIsRefreshing(false)
   }
 
   const handleExport = () => {
     // In a real app, this would export the metrics data
     alert('Exporting metrics data...')
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2">Loading metrics...</span>
+      </div>
+    )
   }
 
   return (
@@ -423,7 +478,7 @@ export function MetricsPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <MetricCard
           title="Avg Response Time"
-          value={152}
+          value={metricsData.overview?.avgResponseTime || 152}
           change={-5.2}
           icon={Clock}
           color="blue"
@@ -431,7 +486,7 @@ export function MetricsPage() {
         />
         <MetricCard
           title="Success Rate"
-          value={98.1}
+          value={metricsData.overview?.successRate || 98.1}
           change={0.3}
           icon={Target}
           color="green"
@@ -439,21 +494,21 @@ export function MetricsPage() {
         />
         <MetricCard
           title="Total Requests"
-          value={2847}
+          value={metricsData.overview?.totalRequests || 2847}
           change={12.5}
           icon={Activity}
           color="purple"
         />
         <MetricCard
           title="Throughput"
-          value={78}
+          value={metricsData.overview?.throughput || 78}
           change={8.2}
           icon={Zap}
           color="yellow"
         />
         <MetricCard
           title="Error Rate"
-          value={1.9}
+          value={metricsData.overview?.errorRate || 1.9}
           change={-0.5}
           icon={AlertTriangle}
           color="red"
@@ -471,15 +526,15 @@ export function MetricsPage() {
         </TabsList>
 
         <TabsContent value="performance" className="space-y-6">
-          <PerformanceChart data={performanceData} timeframe={timeframe} />
+          <PerformanceChart data={metricsData.performance} timeframe={timeframe} />
           <div className="grid gap-6 lg:grid-cols-2">
-            <AgentComparisonChart data={agentMetrics} />
+            <AgentComparisonChart data={metricsData.agents} />
             <TaskDistributionChart data={taskDistribution} />
           </div>
         </TabsContent>
 
         <TabsContent value="agents" className="space-y-6">
-          <AgentMetricsTable data={agentMetrics} />
+          <AgentMetricsTable data={metricsData.agents} />
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
               <CardHeader>
@@ -490,7 +545,7 @@ export function MetricsPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={agentMetrics}>
+                  <BarChart data={metricsData.agents}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="agent" />
                     <YAxis domain={[95, 100]} />
@@ -509,7 +564,7 @@ export function MetricsPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={agentMetrics}>
+                  <BarChart data={metricsData.agents}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="agent" />
                     <YAxis domain={[95, 100]} />
@@ -524,7 +579,7 @@ export function MetricsPage() {
 
         <TabsContent value="errors" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
-            <ErrorAnalysisChart data={errorAnalysis} />
+            <ErrorAnalysisChart data={metricsData.errors} />
             <Card>
               <CardHeader>
                 <CardTitle>Error Trends</CardTitle>
@@ -534,7 +589,7 @@ export function MetricsPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={performanceData}>
+                  <AreaChart data={metricsData.performance}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="time" />
                     <YAxis />
@@ -565,7 +620,7 @@ export function MetricsPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
-                  <AreaChart data={performanceData}>
+                  <AreaChart data={metricsData.performance}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="time" />
                     <YAxis />
