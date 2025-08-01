@@ -1,25 +1,23 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { Sidebar } from '@/components/Sidebar'
+import { Header } from '@/components/Header'
+import { Dashboard } from '@/components/Dashboard'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import './App.css'
-
-// Simple test component first
-function TestApp() {
-  return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>🎉 FMAA Dashboard Test</h1>
-      <p>If you can see this, React is working!</p>
-      <p>Current time: {new Date().toISOString()}</p>
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={() => alert('Button works!')}>Test Button</button>
-      </div>
-    </div>
-  )
-}
 
 // Main App with error boundary
 function App() {
   const [hasError, setHasError] = useState(false)
-  const [isTestMode, setIsTestMode] = useState(true) // Start in test mode
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  
+  // Default system status
+  const defaultSystemStatus = {
+    status: 'healthy',
+    agents: { total: 3, active: 3 },
+    tasks: { running: 5, completed: 1247, failed: 3 },
+    errors: { total: 0 }
+  }
   
   useEffect(() => {
     console.log('App component mounted successfully!')
@@ -41,52 +39,34 @@ function App() {
     )
   }
 
-  // Test mode first
-  if (isTestMode) {
-    return (
-      <div>
-        <TestApp />
-        <button 
-          onClick={() => setIsTestMode(false)}
-          style={{ margin: '20px', padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px' }}
-        >
-          Load Full Dashboard
-        </button>
-      </div>
-    )
-  }
-
-  try {
-    // Import components dynamically to catch import errors
-    const { Sidebar } = require('@/components/Sidebar')
-    const { Header } = require('@/components/Header')
-    const { Dashboard } = require('@/components/Dashboard')
-    const { ThemeProvider } = require('@/components/ThemeProvider')
-
-    return (
-      <ThemeProvider defaultTheme="light" storageKey="fmaa-ui-theme">
-        <Router>
-          <div className="min-h-screen bg-background">
-            <div className="lg:pl-72">
-              <main className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                  <Routes>
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/*" element={<div>Page not found</div>} />
-                  </Routes>
-                </div>
-              </main>
-            </div>
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="fmaa-ui-theme">
+      <Router>
+        <div className="min-h-screen bg-background">
+          <Sidebar 
+            open={sidebarOpen} 
+            onOpenChange={setSidebarOpen}
+            systemStatus={defaultSystemStatus}
+          />
+          <div className="lg:pl-72">
+            <Header 
+              onMenuClick={() => setSidebarOpen(true)} 
+              systemStatus={defaultSystemStatus}
+            />
+            <main className="py-6">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/*" element={<div>Page not found</div>} />
+                </Routes>
+              </div>
+            </main>
           </div>
-        </Router>
-      </ThemeProvider>
-    )
-  } catch (error) {
-    console.error('Error loading components:', error)
-    setHasError(true)
-    return <div>Loading error: {error.message}</div>
-  }
+        </div>
+      </Router>
+    </ThemeProvider>
+  )
 }
 
 export default App

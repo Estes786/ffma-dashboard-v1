@@ -31,8 +31,10 @@ import {
   Zap,
   Database,
   Server,
-  RefreshCw
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react'
+import { useSystemStatus, useMetrics, useRecentActivity } from '@/hooks/useApi'
 
 // Mock data for charts
 const performanceData = [
@@ -142,13 +144,17 @@ function AgentStatusCard() {
 }
 
 function RecentActivity() {
-  const activities = [
+  const { activities: realActivities } = useRecentActivity()
+  
+  const defaultActivities = [
     { time: '2 min ago', action: 'Sentiment analysis completed', agent: 'Sentiment Analyzer', status: 'success' },
     { time: '5 min ago', action: 'Recommendation generated', agent: 'Product Recommender', status: 'success' },
     { time: '8 min ago', action: 'Performance report generated', agent: 'Performance Monitor', status: 'success' },
     { time: '12 min ago', action: 'Task failed - timeout', agent: 'Sentiment Analyzer', status: 'error' },
     { time: '15 min ago', action: 'New agent deployed', agent: 'System', status: 'info' },
   ]
+
+  const activities = realActivities.length > 0 ? realActivities : defaultActivities
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -247,14 +253,53 @@ function SystemHealth() {
   )
 }
 
-export function Dashboard({ systemStatus }) {
+export function Dashboard() {
+  const { systemStatus, loading: statusLoading, error: statusError, refreshSystemStatus } = useSystemStatus()
+  const { metrics, loading: metricsLoading, error: metricsError, fetchMetrics } = useMetrics('24h')
+  const { activities, loading: activitiesLoading, error: activitiesError, fetchActivities } = useRecentActivity()
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
-    // Simulate refresh delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsRefreshing(false)
+    try {
+      await Promise.all([
+        refreshSystemStatus(),
+        fetchMetrics(),
+        fetchActivities()
+      ])
+    } catch (error) {
+      console.error('Refresh failed:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  // Show loading state
+  if (statusLoading || metricsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading dashboard data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (statusError || metricsError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+          <p className="text-red-500 mb-2">Failed to load dashboard data</p>
+          <Button onClick={handleRefresh} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -277,15 +322,15 @@ export function Dashboard({ systemStatus }) {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Agents"
-          value={systemStatus.agents.total}
-          description={`${systemStatus.agents.active} active agents`}
+          value={systemStatus.agents.total || 0}
+          description={`${systemStatus.agents.active || 0} active agents`}
           icon={Bot}
           trend="+2 this week"
           color="blue"
         />
         <StatCard
           title="Tasks Completed"
-          value="1,247"
+          value={systemStatus.tasks.completed || 0}
           description="Last 24 hours"
           icon={CheckCircle}
           trend="+12% from yesterday"
@@ -293,7 +338,7 @@ export function Dashboard({ systemStatus }) {
         />
         <StatCard
           title="Avg Response Time"
-          value="145ms"
+          value={`${Math.round(systemStatus.performance.avgResponseTime || 0)}ms`}
           description="Across all agents"
           icon={Zap}
           trend="-5ms from last hour"
@@ -301,7 +346,7 @@ export function Dashboard({ systemStatus }) {
         />
         <StatCard
           title="Success Rate"
-          value="98.2%"
+          value={`${(systemStatus.performance.successRate || 0).toFixed(1)}%`}
           description="Last 24 hours"
           icon={TrendingUp}
           trend="+0.3% from yesterday"
@@ -321,7 +366,7 @@ export function Dashboard({ systemStatus }) {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={performanceData}>
+              <LineChart data={metrics.performance.length > 0 ? metrics.performance : performanceData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="time" />
                 <YAxis yAxisId="left" />

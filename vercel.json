@@ -1,5 +1,20 @@
 {
   "buildCommand": "cd fmaa-dashboard && npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "fmaa-dashboard/dist",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
