@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vercel dev",
-    "build": "cd fmaa-dashboard && npm install --legacy-peer-deps && npm run build && cp -r dist/* ../",
+    "build": "cd fmaa-dashboard && npm install --legacy-peer-deps && npm run build",
     "deploy": "vercel --prod",
     "test": "jest",
     "install-all": "npm install && cd fmaa-dashboard && npm install --legacy-peer-deps"
