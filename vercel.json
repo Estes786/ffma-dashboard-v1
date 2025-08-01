@@ -19,11 +19,15 @@
       "dest": "/api/$1"
     },
     {
+      "src": "/",
+      "dest": "/api/index"
+    },
+    {
       "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "/fmaa-dashboard/dist/index.html"
+      "dest": "/api/index"
     }
   ]
 }
